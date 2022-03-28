@@ -1,3 +1,5 @@
+from calendar import c
+from textwrap import fill
 from tkinter import *
 
 
@@ -14,7 +16,7 @@ class App:
         self.root = Tk()
         self.root.title("Path finding algorithm visualization")
         self.root.geometry(f'{w}x{h}')
-        self.root.config(bg='dark green')
+        self.root.config(bg='dark gray')
 
 
         #the maze canvas
@@ -23,16 +25,20 @@ class App:
 
 
         self.grid = [[0] * 8 for _ in range(8)]
-        self.tiles = [[None]*8 for _ in range(8)]
+        self.tiles = [[(None,None)]*8 for _ in range(8)]
 
         for i in range(8):
             for j in range(8):
                 self.tiles[i][j] = self.cv.create_rectangle(i*self.SIZE,j*self.SIZE,i*self.SIZE + self.SIZE,j*self.SIZE + self.SIZE
-                ,fill='beige')
+                ,fill='beige'),(i,j)
+
+                
 
         for i in range(8):
             for j in range(8):
-                self.cv.tag_bind(self.tiles[i][j],"<Button-1>",lambda e : self.color(e,self.tiles[i][j]))
+                ob = self.tiles[i][j]
+                self.cv.tag_bind(ob[0],"<Button-1>",self.color)
+                
 
         
     def drawMaze(self):
@@ -43,9 +49,29 @@ class App:
                 self.tiles[i].append()
 
 
-    def color(self,event,tile,color='brown'):
+    def color(self,event,color='brown'):
         current = event.widget.find_withtag("current")[0]
         event.widget.itemconfig(current, fill=color)
+
+        col = round((current - 0.001)//8)
+        row = current%8
+
+        if row == 0:
+            row = 8
+
+        row -= 1
+
+
+        print(row,col)
+        self.grid[row][col] = 'W'
+       
+
+        for r in self.grid:
+            print(r)
+
+
+        
+     
 
 
     def run(self):
