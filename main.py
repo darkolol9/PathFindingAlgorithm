@@ -3,21 +3,25 @@ from textwrap import fill
 from time import sleep
 from threading import Thread
 from tkinter import *
+from random import randint
+
+grid_size = 30
 
 
 example = [[0,0,0,0,0,0,0,0],
             [[0,0,0,0,0,0,0,0]]]
 
 
-
+GOAL  = (randint(0,grid_size-1),randint(0,grid_size-1))
 
 
 def findPath(grid,i,j,app):
+    # sleep(0.0000000000000000001)
     
-    if (i,j) == (7,7):
+    if (i,j) == GOAL:
         print('solution:')
-        grid[i][j] = 'T'
-        app.drawMaze()
+        # grid[i][j] = 'T'
+        app.root.after(0,app.drawMaze)
         return True
     
     directions = [(0,1),(1,0),(-1,0),(0,-1)]
@@ -33,16 +37,13 @@ def findPath(grid,i,j,app):
     
     for dir in directions:
         grid[i][j] = 'T'
-        app.root.after(50,app.drawMaze)
-        # color(grid,i,j,'blue')
-        if i+dir[0] >= 0 and i+dir[0] <= 7 and j+dir[1] >= 0 and j+dir[1] <= 7:
+        # app.root.after(0,app.drawMaze)
+        if i+dir[0] >= 0 and i+dir[0] <= grid_size-1 and j+dir[1] >= 0 and j+dir[1] <= grid_size-1:
             if findPath(grid,i+dir[0],j+dir[1],app):
                 return True
-        else:
-            continue
 
     grid[i][j] = 'H'
-    app.root.after(50,app.drawMaze)
+    # app.root.after(0,app.drawMaze)
     return
     
 
@@ -57,7 +58,7 @@ class App:
     def __init__(self,w,h):
 
         #consts
-        self.SIZE = 75
+        self.SIZE = 20
         self.COLOR = None
 
         #root settings
@@ -66,7 +67,7 @@ class App:
         self.root.title("Path finding algorithm visualization")
         self.root.geometry(f'{w}x{h}')
         self.root.config(bg='dark gray')
-        self.butt = Button(self.root,text='findPath',command=lambda : self.root.after(5,lambda :findPath(self.grid,0,0,self)))
+        self.butt = Button(self.root,text='findPath',command=lambda : buttonClick(self.grid,self))
         self.butt.pack()
 
 
@@ -75,18 +76,24 @@ class App:
         self.cv.pack()
 
 
-        self.grid = [[0] * 8 for _ in range(8)]
-        self.tiles = [[(None,None)]*8 for _ in range(8)]
+        self.grid = [[0] * grid_size for _ in range(grid_size)]
+        self.grid[GOAL[0]][GOAL[1]] = 'G'
+        self.tiles = [[(None,None)]*grid_size for _ in range(grid_size)]
 
-        for i in range(8):
-            for j in range(8):
+        color = 'beige'
+
+        for i in range(grid_size):
+            for j in range(grid_size):
+                if (i,j) == GOAL:
+                    color = 'cyan'
                 self.tiles[i][j] = self.cv.create_rectangle(j*self.SIZE,i*self.SIZE,j*self.SIZE + self.SIZE,i*self.SIZE + self.SIZE
-                ,fill='beige'),(i,j)
+                ,fill=color),(i,j)
+                color = 'beige'
 
                 
 
-        for i in range(8):
-            for j in range(8):
+        for i in range(grid_size):
+            for j in range(grid_size):
                 ob = self.tiles[i][j]
                 self.cv.tag_bind(ob[0],"<Button-1>",lambda e:self.color(e))
                 
@@ -96,8 +103,8 @@ class App:
         #needs editing
         # self.cv.delete('all')
 
-        for i in range(8):
-            for j in range(8):
+        for i in range(grid_size):
+            for j in range(grid_size):
                 if self.grid[i][j] == 'W':
                     self.cv.create_rectangle(j*self.SIZE,i*self.SIZE,j*self.SIZE + self.SIZE,i*self.SIZE + self.SIZE
                     ,fill='brown')
@@ -107,6 +114,9 @@ class App:
                 elif self.grid[i][j] == 'H':
                     self.cv.create_rectangle(j*self.SIZE,i*self.SIZE,j*self.SIZE + self.SIZE,i*self.SIZE + self.SIZE
                     ,fill='orange')
+                elif self.grid[i][j] == 'G':
+                    self.cv.create_rectangle(j*self.SIZE,i*self.SIZE,j*self.SIZE + self.SIZE,i*self.SIZE + self.SIZE
+                    ,fill='blue')
                 else:
                     self.cv.create_rectangle(j*self.SIZE,i*self.SIZE,j*self.SIZE + self.SIZE,i*self.SIZE + self.SIZE
                     ,fill='beige')
@@ -116,12 +126,12 @@ class App:
         current = event.widget.find_withtag("current")[0]
         event.widget.itemconfig(current, fill=color)
 
-        col = int(current - 0.00001)//8
-        row = current%8
+        col = int(current - 0.00001)//grid_size
+        row = current%grid_size
 
 
         if row == 0:
-            row = 8
+            row = grid_size
 
 
         row -= 1
