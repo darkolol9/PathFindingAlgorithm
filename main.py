@@ -80,12 +80,21 @@ class App:
         self.grid[GOAL[0]][GOAL[1]] = 'G'
         self.tiles = [[(None,None)]*grid_size for _ in range(grid_size)]
 
+
+        for i in range(1,grid_size):
+            for j in range(grid_size):
+                if randint(0,100) > 75:
+                    self.grid[i][j] = 'W'
+
+
         color = 'beige'
 
         for i in range(grid_size):
             for j in range(grid_size):
                 if (i,j) == GOAL:
-                    color = 'cyan'
+                    color = 'blue'
+                elif self.grid[i][j] == "W":
+                    color = 'brown'
                 self.tiles[i][j] = self.cv.create_rectangle(j*self.SIZE,i*self.SIZE,j*self.SIZE + self.SIZE,i*self.SIZE + self.SIZE
                 ,fill=color),(i,j)
                 color = 'beige'
